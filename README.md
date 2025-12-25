@@ -1,5 +1,7 @@
-I-Based Full Body Measurement Estimation (Approximate)
+**AI-Based Full Body Measurement Estimation (Approximate)**
+
 📌 Overview
+
 This project presents an AI-based system for estimating approximate human body measurements using only 2D images.
 The system processes three pose images of the same person — Front View, Side View, and Standing View — and automatically estimates body measurements without any manual inputs.
 
@@ -18,14 +20,18 @@ Estimated Height
 Shoulder Width
 Arm Length
 Leg / Inseam Length
+
 🧠 Approach Used
+
 1. Pose Estimation
 The system uses MediaPipe Pose to detect 33 anatomical body landmarks.
 These landmarks correspond to key joints such as shoulders, hips, knees, ankles, elbows, and wrists.
-2. Geometric Measurement
+
+3. Geometric Measurement
 Distances between joints are calculated using Euclidean distance.
 Limb lengths are computed using joint-chain summation (e.g., shoulder → elbow → wrist), which improves accuracy over straight-line measurement.
-3. Automatic Height Estimation
+
+5. Automatic Height Estimation
 Since 2D images lack absolute scale, height is estimated automatically using anthropometric body ratios, such as:
 
 Shoulder width ≈ 23% of height
@@ -36,7 +42,8 @@ Multiple estimates are averaged and constrained within realistic human ranges.
 4. Multi-View Fusion
 Measurements are calculated independently from front, side, and standing images.
 The median value across views is selected as the final measurement, reducing noise and pose-related errors.
-5. Robustness Techniques
+
+6. Robustness Techniques
 Landmark visibility filtering removes unreliable keypoints.
 Posture validation ensures upright standing.
 Anthropometric constraints prevent unrealistic outputs.
@@ -90,6 +97,7 @@ Docker
 Hugging Face Spaces
 Lovable (Frontend)
 Vercel (Hosting)
+
 📌 Conclusion
 This project demonstrates a robust, explainable, and deployable AI system for approximate body measurement estimation using only images.
 It satisfies all academic requirements, provides a working web-based demo, and delivers realistic accuracy with proper justification.
