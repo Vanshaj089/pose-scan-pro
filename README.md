@@ -115,12 +115,19 @@ As required, approach and explanation are prioritized over raw accuracy.
 **🛠️ Technologies Used**
 
 Python
+
 FastAPI
+
 MediaPipe Pose
+
 OpenCV
+
 Docker
+
 Hugging Face Spaces
+
 Lovable (Frontend)
+
 Vercel (Hosting)
 
 **📌 Conclusion**
