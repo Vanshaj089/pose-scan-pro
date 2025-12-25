@@ -8,8 +8,11 @@ The system processes three pose images of the same person — Front View, Side V
 The solution emphasizes explainable computer vision techniques rather than black-box machine learning, making it suitable for academic evaluation and real-world demonstration.
 
 **Important Links**
+
 Web App: https://pose-scan-pro.vercel.app/
+
 Backend: https://huggingface.co/spaces/Vanshaj089/body-measurement-docker
+
 Swagger url(API): https://vanshaj089-body-measurement-docker.hf.space/docs
 
 
