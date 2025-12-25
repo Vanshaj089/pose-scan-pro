@@ -1,14 +1,20 @@
 import { Info, Ruler } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface MeasurementResultsProps {
   data: Record<string, unknown>;
 }
 
+// Convert snake_case to Title Case and remove _cm suffix for display
 const formatLabel = (key: string): string => {
   return key
+    .replace(/_cm$/, "") // Remove _cm suffix
     .replace(/_/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+// Check if key contains _cm to determine unit
+const hasUnitCm = (key: string): boolean => {
+  return key.toLowerCase().includes("_cm") || key.toLowerCase().includes("cm");
 };
 
 const isNumericMeasurement = (value: unknown): value is number => {
@@ -16,22 +22,52 @@ const isNumericMeasurement = (value: unknown): value is number => {
 };
 
 const isNote = (key: string): boolean => {
-  const noteKeys = ["note", "notes", "accuracy_note", "message", "info"];
+  const noteKeys = ["note", "notes", "accuracy_note", "accuracy", "message", "info", "status"];
   return noteKeys.some((noteKey) => key.toLowerCase().includes(noteKey));
 };
 
+const isNestedObject = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+};
+
+// Flatten nested measurements object into array of [key, value] pairs
+const extractMeasurements = (data: Record<string, unknown>): Array<[string, number]> => {
+  const results: Array<[string, number]> = [];
+  
+  for (const [key, value] of Object.entries(data)) {
+    // If it's a nested measurements object, extract its contents
+    if (key === "measurements" && isNestedObject(value)) {
+      for (const [nestedKey, nestedValue] of Object.entries(value)) {
+        if (isNumericMeasurement(nestedValue)) {
+          results.push([nestedKey, nestedValue]);
+        }
+      }
+    } 
+    // If it's a direct numeric measurement (not a note)
+    else if (isNumericMeasurement(value) && !isNote(key)) {
+      results.push([key, value]);
+    }
+  }
+  
+  return results;
+};
+
+// Extract notes from data (top-level or nested)
+const extractNotes = (data: Record<string, unknown>): Array<[string, string]> => {
+  const results: Array<[string, string]> = [];
+  
+  for (const [key, value] of Object.entries(data)) {
+    if (isNote(key) && typeof value === "string") {
+      results.push([key, value]);
+    }
+  }
+  
+  return results;
+};
+
 const MeasurementResults = ({ data }: MeasurementResultsProps) => {
-  const entries = Object.entries(data);
-  
-  const measurements = entries.filter(
-    ([key, value]) => isNumericMeasurement(value) && !isNote(key)
-  );
-  
-  const notes = entries.filter(([key]) => isNote(key));
-  
-  const otherFields = entries.filter(
-    ([key, value]) => !isNumericMeasurement(value) && !isNote(key)
-  );
+  const measurements = extractMeasurements(data);
+  const notes = extractNotes(data);
 
   return (
     <div className="w-full animate-slide-up">
@@ -58,30 +94,10 @@ const MeasurementResults = ({ data }: MeasurementResultsProps) => {
                 {formatLabel(key)}
               </p>
               <p className="font-display text-2xl font-bold text-foreground">
-                {typeof value === "number" ? value.toFixed(1) : String(value)}
+                {value.toFixed(1)}
                 <span className="text-sm font-normal text-muted-foreground ml-1">
                   cm
                 </span>
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Other Fields */}
-      {otherFields.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {otherFields.map(([key, value], index) => (
-            <div
-              key={key}
-              className="bg-card rounded-xl p-5 shadow-soft border border-border/50 animate-fade-in"
-              style={{ animationDelay: `${(measurements.length + index) * 50}ms` }}
-            >
-              <p className="text-sm text-muted-foreground mb-1">
-                {formatLabel(key)}
-              </p>
-              <p className="font-medium text-foreground">
-                {String(value)}
               </p>
             </div>
           ))}
@@ -102,7 +118,7 @@ const MeasurementResults = ({ data }: MeasurementResultsProps) => {
                   {formatLabel(key)}
                 </p>
                 <p className="text-sm text-accent-foreground/80">
-                  {String(value)}
+                  {value}
                 </p>
               </div>
             </div>
